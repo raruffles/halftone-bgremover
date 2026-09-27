@@ -1,0 +1,6 @@
+{
+  "name": "DTX Halftone Studio - DTF & DTG Separation",
+  "description": "Estúdio profissional de separação de artes para DTF, DTG e serigrafia com remoção de fundo preto, retícula halftone suave, eliminação de névoa branca e exportação em alta resolução.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

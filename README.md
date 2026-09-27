@@ -2,11 +2,9 @@
 <img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
 </div>
 
-# Run and deploy your AI Studio app
+# SCRW Halftone - DTF & DTG Separation Studio
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/aabf04e2-06db-4ef6-8c60-02d16aef4442
+Estúdio profissional de separação de cores e retículas halftone para impressão em estamparia DTF (Direct to Film), DTG (Direct to Garment) e Serigrafia. Conta com remoção de fundo com IA (Google Gemini), retícula suave, eliminação de névoa branca (white haze choke) e exportação em alta resolução (PNG 300 DPI, TIFF e SVG vetorial).
 
 ## Run Locally
 

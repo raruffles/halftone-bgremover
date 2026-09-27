@@ -235,7 +235,7 @@ async function startServer() {
   }
 
   app.listen(port, '0.0.0.0', () => {
-    console.log(`DTX Halftone Studio Server running at http://0.0.0.0:${port}`);
+    console.log(`SCRW Halftone Server running at http://0.0.0.0:${port}`);
   });
 }
 

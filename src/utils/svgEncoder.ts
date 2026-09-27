@@ -40,7 +40,7 @@ export function generateHalftoneSVG(
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">
-  <!-- Halftone Studio Pro Vector Export - Transparent Background -->
+  <!-- SCRW Halftone Pro Vector Export - Transparent Background -->
   <g id="halftone-screen">
   ${elements}
   </g>

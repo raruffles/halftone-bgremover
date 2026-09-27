@@ -294,12 +294,12 @@ export default function App() {
     };
   };
 
-  // Save Project as .dtx
+  // Save Project as .scrw
   const handleSaveDtxProject = () => {
     if (!activeImage) return;
 
     const projectData = {
-      format: 'DTX_PROJECT',
+      format: 'SCRW_PROJECT',
       version: '1.0',
       name: activeImageName,
       imageDataUrl: activeImage.src,
@@ -310,8 +310,8 @@ export default function App() {
     const jsonStr = JSON.stringify(projectData, null, 2);
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const baseName = activeImageName.replace(/\.[^/.]+$/, '');
-    downloadBlob(blob, `${baseName}.dtx`);
-    showToast(`Projeto salvo como "${baseName}.dtx"!`);
+    downloadBlob(blob, `${baseName}.scrw`);
+    showToast(`Projeto salvo como "${baseName}.scrw"!`);
   };
 
   const handleLoadDtxProject = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,13 +328,13 @@ export default function App() {
           img.src = parsed.imageDataUrl;
           img.onload = () => {
             setActiveImage(img);
-            setActiveImageName(parsed.name || file.name.replace('.dtx', '.png'));
+            setActiveImageName(parsed.name || file.name.replace(/\.(scrw|dtx)$/, '.png'));
             setCanvasDimensions({ width: img.naturalWidth, height: img.naturalHeight });
-            showToast('Projeto .dtx restaurado com sucesso!');
+            showToast('Projeto SCRW restaurado com sucesso!');
           };
         }
       } catch (err) {
-        showToast('Arquivo .dtx inválido.');
+        showToast('Arquivo de projeto inválido.');
       }
     };
     reader.readAsText(file);
@@ -648,7 +648,7 @@ export default function App() {
 
       <input
         type="file"
-        accept=".dtx,application/json"
+        accept=".scrw,.dtx,application/json"
         ref={dtxProjectInputRef}
         className="hidden"
         onChange={handleLoadDtxProject}
@@ -661,11 +661,11 @@ export default function App() {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <span className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5">
-              <span className="bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-                ActionSeps™
+              <span className="bg-gradient-to-r from-cyan-400 via-pink-400 to-purple-400 bg-clip-text text-transparent uppercase tracking-wider">
+                SCRW
               </span>
               <span className="px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-mono border border-cyan-500/40">
-                DTX Live
+                Halftone
               </span>
             </span>
             <span className="text-neutral-600 text-xs font-light">|</span>
@@ -709,21 +709,21 @@ export default function App() {
             <span>Upload Art</span>
           </button>
 
-          {/* Save / Load .dtx Project */}
+          {/* Save / Load .scrw Project */}
           <button
             onClick={handleSaveDtxProject}
             disabled={!activeImage}
             className="px-2.5 py-1.5 rounded-xl bg-[#141A28] hover:bg-[#1E273C] text-neutral-300 text-xs font-medium flex items-center gap-1.5 border border-[#232D42] transition-colors cursor-pointer disabled:opacity-40"
-            title="Salvar projeto .dtx com arte e ajustes"
+            title="Salvar projeto .scrw com arte e ajustes"
           >
             <Save size={13} className="text-pink-400" />
-            <span>Save .dtx</span>
+            <span>Save .scrw</span>
           </button>
 
           <button
             onClick={() => dtxProjectInputRef.current?.click()}
             className="p-1.5 rounded-xl bg-[#141A28] hover:bg-[#1E273C] text-neutral-400 hover:text-white border border-[#232D42] transition-colors cursor-pointer"
-            title="Abrir arquivo de projeto .dtx"
+            title="Abrir arquivo de projeto .scrw"
           >
             <FileCode size={14} />
           </button>

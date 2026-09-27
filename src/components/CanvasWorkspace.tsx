@@ -258,7 +258,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
         <div className="absolute inset-0 z-50 bg-cyan-500/20 backdrop-blur-sm border-4 border-dashed border-cyan-400 flex flex-col items-center justify-center gap-3">
           <Layers size={48} className="text-cyan-300 animate-bounce" />
           <div className="text-lg font-bold text-white shadow-sm">
-            Solte sua imagem para carregar no estúdio DTX!
+            Solte sua imagem para carregar no estúdio SCRW Halftone!
           </div>
         </div>
       )}
@@ -508,7 +508,7 @@ export const CanvasWorkspace: React.FC<CanvasWorkspaceProps> = ({
                     }`}
                   />
                   <span>
-                    {activeTab === 'bg-remover' ? 'Recortada (Sem Fundo)' : 'Retícula DTX'}
+                    {activeTab === 'bg-remover' ? 'Recortada (Sem Fundo)' : 'Retícula SCRW'}
                   </span>
                 </div>
 

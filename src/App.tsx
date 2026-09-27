@@ -12,6 +12,7 @@ import {
   Check,
   Scissors,
   Grid,
+  Key,
 } from 'lucide-react';
 import { HalftoneSettings, BatchItem, ViewMode, ActiveStudioTab } from './types/halftone';
 import { DEFAULT_SETTINGS, STYLE_PRESETS } from './constants/presets';
@@ -43,6 +44,8 @@ export default function App() {
   });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState<boolean>(false);
+  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem('gemini_api_key') || '');
+  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState<boolean>(false);
 
   const halftoneCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -475,6 +478,15 @@ export default function App() {
     }
   };
 
+  const getApiHeaders = () => {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const key = apiKey || localStorage.getItem('gemini_api_key');
+    if (key) {
+      headers['x-gemini-api-key'] = key;
+    }
+    return headers;
+  };
+
   // AI Prompt advice
   const handleRunAiPrompt = async (userPrompt: string) => {
     setAiLoading(true);
@@ -493,7 +505,7 @@ export default function App() {
 
       const res = await fetch('/api/ai/process', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders(),
         body: JSON.stringify({
           prompt: userPrompt,
           imageBase64,
@@ -525,8 +537,8 @@ export default function App() {
       } else {
         throw new Error(data.error);
       }
-    } catch (err) {
-      showToast('Otimizado com parâmetros locais recomendados.');
+    } catch (err: any) {
+      showToast(err?.message || 'Otimizado com parâmetros locais recomendados.');
     } finally {
       setAiLoading(false);
     }
@@ -550,7 +562,7 @@ export default function App() {
 
       const res = await fetch('/api/ai/remove-bg', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders(),
         body: JSON.stringify({ imageBase64 }),
       });
 
@@ -567,7 +579,7 @@ export default function App() {
         throw new Error(data.error || 'Falha ao processar recorte');
       }
     } catch (err: any) {
-      showToast('Recorte por cor de fundo aplicado localmente.');
+      showToast(err?.message || 'Recorte por cor de fundo aplicado localmente.');
     } finally {
       setAiLoading(false);
     }
@@ -591,7 +603,7 @@ export default function App() {
 
       const res = await fetch('/api/ai/upscale', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders(),
         body: JSON.stringify({
           imageBase64,
           prompt: 'Crisp vector art separation with sharp edges, high contrast, clean transparent background',
@@ -611,7 +623,7 @@ export default function App() {
         throw new Error(data.error || 'Falha ao processar upscale');
       }
     } catch (err: any) {
-      showToast('AI Upscaler: arte mantida em resolução nativa.');
+      showToast(err?.message || 'AI Upscaler: arte mantida em resolução nativa.');
     } finally {
       setAiLoading(false);
     }
@@ -678,6 +690,16 @@ export default function App() {
 
         {/* Action Controls (No Demo Buttons!) */}
         <div className="flex items-center gap-2">
+          {/* Gemini AI Config */}
+          <button
+            onClick={() => setIsApiKeyModalOpen(true)}
+            className="px-2.5 py-1.5 rounded-xl bg-[#141A28] hover:bg-[#1E273C] text-neutral-300 text-xs font-medium flex items-center gap-1.5 border border-[#232D42] transition-colors cursor-pointer"
+            title="Configurar Chave Gemini API"
+          >
+            <Key size={13} className={apiKey ? 'text-emerald-400' : 'text-purple-400'} />
+            <span className="hidden sm:inline">{apiKey ? 'IA Própria Ativa' : 'Conectar IA'}</span>
+          </button>
+
           {/* Upload Button */}
           <button
             onClick={() => fileInputRef.current?.click()}
@@ -791,6 +813,67 @@ export default function App() {
           <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-[#141A28]/95 backdrop-blur-xl border border-cyan-500/50 rounded-2xl shadow-2xl text-cyan-200 text-xs flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-200">
             <CheckCircle size={16} className="text-cyan-400 shrink-0" />
             <span>{toastMessage}</span>
+          </div>
+        )}
+
+        {/* Gemini API Key Configuration Modal */}
+        {isApiKeyModalOpen && (
+          <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-[#101522] border border-[#232D42] rounded-2xl p-6 w-full max-w-md shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400">
+                    <Key size={18} />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-white">Google Gemini API</h3>
+                    <p className="text-[11px] text-neutral-400">Conecte sua chave própria para funções de IA</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setIsApiKeyModalOpen(false)}
+                  className="text-neutral-400 hover:text-white p-1 rounded-lg text-lg cursor-pointer transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-neutral-300">Sua Chave GEMINI_API_KEY:</label>
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKey(e.target.value)}
+                  placeholder="Cole sua API key (AIzaSy...)"
+                  className="w-full bg-[#182032] border border-[#29354E] rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-cyan-400"
+                />
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Se você não preencher aqui, a aplicação usará a chave configurada no backend ou nas variáveis de ambiente do Netlify (<code className="text-cyan-300 font-mono">GEMINI_API_KEY</code>).
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <a
+                  href="https://aistudio.google.com/app/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-cyan-400 hover:text-cyan-300 underline"
+                >
+                  Obter chave grátis no AI Studio ↗
+                </a>
+
+                <button
+                  onClick={() => {
+                    localStorage.setItem('gemini_api_key', apiKey.trim());
+                    setIsApiKeyModalOpen(false);
+                    showToast(apiKey.trim() ? 'Chave Gemini salva localmente!' : 'Chave local removida. Usando chave padrão.');
+                  }}
+                  className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black text-xs font-bold rounded-xl shadow-md shadow-cyan-500/20 cursor-pointer transition-all"
+                >
+                  Salvar Chave
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>

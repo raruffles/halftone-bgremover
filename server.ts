@@ -11,8 +11,8 @@ const port = 3000;
 app.use(express.json({ limit: '50mb' }));
 
 // Server-side Gemini client
-const getGeminiClient = () => {
-  const apiKey = process.env.GEMINI_API_KEY;
+const getGeminiClient = (customKey?: string) => {
+  const apiKey = customKey || process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return null;
   }
@@ -26,12 +26,35 @@ const getGeminiClient = () => {
   });
 };
 
+async function callGeminiWithRetry<T>(fn: () => Promise<T>, maxRetries = 2, delayMs = 1000): Promise<T> {
+  let lastError: any;
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: any) {
+      lastError = err;
+      const isRetryable =
+        err?.status === 503 ||
+        err?.status === 429 ||
+        err?.message?.includes('503') ||
+        err?.message?.includes('high demand');
+      if (isRetryable && attempt < maxRetries) {
+        await new Promise((r) => setTimeout(r, delayMs * (attempt + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastError;
+}
+
 // API: AI Process / Style Advice for DTF & DTG Separation
 app.post('/api/ai/process', async (req, res) => {
   try {
     const { prompt, imageBase64, styleType } = req.body;
 
-    const ai = getGeminiClient();
+    const customKey = (req.headers['x-gemini-api-key'] as string) || undefined;
+    const ai = getGeminiClient(customKey);
     if (!ai) {
       return res.status(400).json({
         error: 'Chave GEMINI_API_KEY não configurada no servidor. Usando processamento local avançado.',
@@ -72,14 +95,16 @@ Os parâmetros são:
     }
     contents.push({ text: userPrompt });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.8-flash',
-      contents: contents.length === 1 ? contents[0].text : { parts: contents },
-      config: {
-        systemInstruction: systemPrompt,
-        responseMimeType: 'application/json',
-      },
-    });
+    const response = await callGeminiWithRetry(() =>
+      ai.models.generateContent({
+        model: 'gemini-3.8-flash',
+        contents: contents.length === 1 ? contents[0].text : { parts: contents },
+        config: {
+          systemInstruction: systemPrompt,
+          responseMimeType: 'application/json',
+        },
+      })
+    );
 
     const text = response.text || '{}';
     let parsed = {};
